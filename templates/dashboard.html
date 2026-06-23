@@ -1,0 +1,308 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gamma Dashboard - Análisis de Opciones</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link href="{{ url_for('static', filename='css/style.css') }}" rel="stylesheet">
+</head>
+<body>
+    <div class="dashboard-container">
+        <!-- HEADER -->
+        <nav class="navbar navbar-dark bg-dark">
+            <div class="container-fluid">
+                <span class="navbar-brand mb-0 h1">
+                    <i class="fas fa-chart-line"></i> GAMMA DASHBOARD
+                </span>
+                <span class="navbar-text text-muted" id="last-update">Actualizado: --:--:--</span>
+            </div>
+        </nav>
+
+        <div class="container-fluid p-4">
+            <!-- COMPARATIVA DE TICKERS -->
+            <div class="row mb-4">
+                <div class="col-12">
+                    <h2 class="mb-3">📊 Comparativa de Activos</h2>
+                    <div class="row" id="compare-cards">
+                        <!-- Se llena con JavaScript -->
+                    </div>
+                </div>
+            </div>
+
+            <!-- ANÁLISIS DETALLADO POR TICKER -->
+            <div class="row">
+                <div class="col-12">
+                    <h2 class="mb-3">🔍 Análisis Detallado</h2>
+                    
+                    <!-- Tabs para cada ticker -->
+                    <ul class="nav nav-tabs" id="tickerTabs" role="tablist">
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link active" id="qqq-tab" data-bs-toggle="tab" data-bs-target="#qqq-content" type="button" role="tab">QQQ</button>
+                        </li>
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link" id="spy-tab" data-bs-toggle="tab" data-bs-target="#spy-content" type="button" role="tab">SPY</button>
+                        </li>
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link" id="iwm-tab" data-bs-toggle="tab" data-bs-target="#iwm-content" type="button" role="tab">IWM</button>
+                        </li>
+                    </ul>
+
+                    <div class="tab-content" id="tickerTabContent">
+                        <!-- QQQ -->
+                        <div class="tab-pane fade show active" id="qqq-content" role="tabpanel">
+                            <div class="ticker-analysis" data-ticker="QQQ">
+                                <div class="row mt-4">
+                                    <div class="col-md-6 mb-3">
+                                        <div class="card analysis-card">
+                                            <div class="card-body">
+                                                <h5 class="card-title">📈 Información Básica</h5>
+                                                <div class="info-row">
+                                                    <span>Precio Actual:</span>
+                                                    <span class="price-value">--</span>
+                                                </div>
+                                                <div class="info-row">
+                                                    <span>Volatilidad:</span>
+                                                    <span class="volatility-value">--</span>
+                                                </div>
+                                                <div class="info-row">
+                                                    <span>Expiración:</span>
+                                                    <span class="expiry-value">--</span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="col-md-6 mb-3">
+                                        <div class="card analysis-card">
+                                            <div class="card-body">
+                                                <h5 class="card-title">🎯 Predicción</h5>
+                                                <div class="prediction-badge mb-3">
+                                                    <span class="badge direction-badge">--</span>
+                                                </div>
+                                                <div class="info-row">
+                                                    <span>Riesgo Gamma:</span>
+                                                    <span class="badge gamma-risk-badge">--</span>
+                                                </div>
+                                                <div class="info-row">
+                                                    <span>Gamma Squeeze:</span>
+                                                    <span class="badge squeeze-badge">--</span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="row mt-3">
+                                    <div class="col-12">
+                                        <div class="card analysis-card">
+                                            <div class="card-body">
+                                                <h5 class="card-title">📊 Greeks Agregados</h5>
+                                                <div class="row text-center">
+                                                    <div class="col-md-3">
+                                                        <div class="greek-item">
+                                                            <h6>Delta Neto</h6>
+                                                            <h4 class="delta-value">--</h4>
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-md-3">
+                                                        <div class="greek-item">
+                                                            <h6>Gamma Neto</h6>
+                                                            <h4 class="gamma-value">--</h4>
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-md-3">
+                                                        <div class="greek-item">
+                                                            <h6>Delta Call</h6>
+                                                            <h4 class="call-delta-value">--</h4>
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-md-3">
+                                                        <div class="greek-item">
+                                                            <h6>Delta Put</h6>
+                                                            <h4 class="put-delta-value">--</h4>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- SPY -->
+                        <div class="tab-pane fade" id="spy-content" role="tabpanel">
+                            <div class="ticker-analysis" data-ticker="SPY">
+                                <div class="row mt-4">
+                                    <div class="col-md-6 mb-3">
+                                        <div class="card analysis-card">
+                                            <div class="card-body">
+                                                <h5 class="card-title">📈 Información Básica</h5>
+                                                <div class="info-row">
+                                                    <span>Precio Actual:</span>
+                                                    <span class="price-value">--</span>
+                                                </div>
+                                                <div class="info-row">
+                                                    <span>Volatilidad:</span>
+                                                    <span class="volatility-value">--</span>
+                                                </div>
+                                                <div class="info-row">
+                                                    <span>Expiración:</span>
+                                                    <span class="expiry-value">--</span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="col-md-6 mb-3">
+                                        <div class="card analysis-card">
+                                            <div class="card-body">
+                                                <h5 class="card-title">🎯 Predicción</h5>
+                                                <div class="prediction-badge mb-3">
+                                                    <span class="badge direction-badge">--</span>
+                                                </div>
+                                                <div class="info-row">
+                                                    <span>Riesgo Gamma:</span>
+                                                    <span class="badge gamma-risk-badge">--</span>
+                                                </div>
+                                                <div class="info-row">
+                                                    <span>Gamma Squeeze:</span>
+                                                    <span class="badge squeeze-badge">--</span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="row mt-3">
+                                    <div class="col-12">
+                                        <div class="card analysis-card">
+                                            <div class="card-body">
+                                                <h5 class="card-title">📊 Greeks Agregados</h5>
+                                                <div class="row text-center">
+                                                    <div class="col-md-3">
+                                                        <div class="greek-item">
+                                                            <h6>Delta Neto</h6>
+                                                            <h4 class="delta-value">--</h4>
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-md-3">
+                                                        <div class="greek-item">
+                                                            <h6>Gamma Neto</h6>
+                                                            <h4 class="gamma-value">--</h4>
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-md-3">
+                                                        <div class="greek-item">
+                                                            <h6>Delta Call</h6>
+                                                            <h4 class="call-delta-value">--</h4>
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-md-3">
+                                                        <div class="greek-item">
+                                                            <h6>Delta Put</h6>
+                                                            <h4 class="put-delta-value">--</h4>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- IWM -->
+                        <div class="tab-pane fade" id="iwm-content" role="tabpanel">
+                            <div class="ticker-analysis" data-ticker="IWM">
+                                <div class="row mt-4">
+                                    <div class="col-md-6 mb-3">
+                                        <div class="card analysis-card">
+                                            <div class="card-body">
+                                                <h5 class="card-title">📈 Información Básica</h5>
+                                                <div class="info-row">
+                                                    <span>Precio Actual:</span>
+                                                    <span class="price-value">--</span>
+                                                </div>
+                                                <div class="info-row">
+                                                    <span>Volatilidad:</span>
+                                                    <span class="volatility-value">--</span>
+                                                </div>
+                                                <div class="info-row">
+                                                    <span>Expiración:</span>
+                                                    <span class="expiry-value">--</span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="col-md-6 mb-3">
+                                        <div class="card analysis-card">
+                                            <div class="card-body">
+                                                <h5 class="card-title">🎯 Predicción</h5>
+                                                <div class="prediction-badge mb-3">
+                                                    <span class="badge direction-badge">--</span>
+                                                </div>
+                                                <div class="info-row">
+                                                    <span>Riesgo Gamma:</span>
+                                                    <span class="badge gamma-risk-badge">--</span>
+                                                </div>
+                                                <div class="info-row">
+                                                    <span>Gamma Squeeze:</span>
+                                                    <span class="badge squeeze-badge">--</span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="row mt-3">
+                                    <div class="col-12">
+                                        <div class="card analysis-card">
+                                            <div class="card-body">
+                                                <h5 class="card-title">📊 Greeks Agregados</h5>
+                                                <div class="row text-center">
+                                                    <div class="col-md-3">
+                                                        <div class="greek-item">
+                                                            <h6>Delta Neto</h6>
+                                                            <h4 class="delta-value">--</h4>
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-md-3">
+                                                        <div class="greek-item">
+                                                            <h6>Gamma Neto</h6>
+                                                            <h4 class="gamma-value">--</h4>
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-md-3">
+                                                        <div class="greek-item">
+                                                            <h6>Delta Call</h6>
+                                                            <h4 class="call-delta-value">--</h4>
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-md-3">
+                                                        <div class="greek-item">
+                                                            <h6>Delta Put</h6>
+                                                            <h4 class="put-delta-value">--</h4>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/chart.js/3.9.1/chart.min.js"></script>
+    <script src="{{ url_for('static', filename='js/app.js') }}"></script>
+</body>
+</html>
