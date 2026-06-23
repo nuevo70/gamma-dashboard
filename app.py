@@ -264,9 +264,9 @@ def update_data_background():
                 if result:
                     analysis_data[ticker] = result
                     
-                    # Guardar historial (máximo 100 registros)
+                    # Guardar historial (máximo 288 registros = 24 horas a 5 min)
                     analysis_history[ticker].append(result)
-                    if len(analysis_history[ticker]) > 100:
+                    if len(analysis_history[ticker]) > 288:
                         analysis_history[ticker].pop(0)
             
             print(f"[{datetime.now().strftime('%H:%M:%S')}] Datos actualizados")
@@ -304,7 +304,7 @@ def get_ticker_data(ticker):
 
 @app.route('/api/history/<ticker>')
 def get_ticker_history(ticker):
-    """Obtiene historial de análisis de un ticker"""
+    """Obtiene historial completo de análisis"""
     if ticker.upper() in analysis_history:
         return jsonify(analysis_history[ticker.upper()])
     return jsonify({'error': 'Ticker not found'}), 404
@@ -331,6 +331,32 @@ def compare_tickers():
             }
     
     return jsonify(comparison)
+
+
+@app.route('/api/chart-data/<ticker>')
+def get_chart_data(ticker):
+    """Obtiene datos formateados para gráficos"""
+    if ticker.upper() not in analysis_history:
+        return jsonify({'error': 'Ticker not found'}), 404
+    
+    history = analysis_history[ticker.upper()]
+    
+    if not history:
+        return jsonify({
+            'timestamps': [],
+            'prices': [],
+            'deltas': [],
+            'gammas': [],
+            'volatilities': []
+        })
+    
+    return jsonify({
+        'timestamps': [item['timestamp'] for item in history],
+        'prices': [item['current_price'] for item in history],
+        'deltas': [item['greeks']['net_delta'] for item in history],
+        'gammas': [item['greeks']['net_gamma'] for item in history],
+        'volatilities': [item['volatility'] for item in history]
+    })
 
 
 # ============================================

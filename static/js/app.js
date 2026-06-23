@@ -1,6 +1,20 @@
-// Variables globales
+// Variables globales para gráficos
+let charts = {};
 let refreshInterval = 30000; // 30 segundos
 let updateTimer;
+
+// Colores del tema oscuro
+const chartColors = {
+    delta: 'rgba(0, 212, 255, 1)',
+    gamma: 'rgba(255, 107, 107, 1)',
+    price: 'rgba(76, 175, 80, 1)',
+    vol: 'rgba(255, 167, 38, 1)',
+    grid: 'rgba(74, 74, 106, 0.2)'
+};
+
+// Configuración de Chart.js global
+Chart.defaults.color = 'rgba(160, 160, 192, 0.8)';
+Chart.defaults.borderColor = 'rgba(74, 74, 106, 0.3)';
 
 // Función para obtener datos de la API
 async function fetchData() {
@@ -12,6 +26,7 @@ async function fetchData() {
         ['QQQ', 'SPY', 'IWM'].forEach(ticker => {
             if (data[ticker]) {
                 updateTickerDisplay(ticker, data[ticker]);
+                updateCharts(ticker);
             }
         });
         
@@ -61,6 +76,145 @@ function updateTickerDisplay(ticker, data) {
     container.querySelector('.put-delta-value').textContent = data.greeks.put_delta.toFixed(4);
 }
 
+// Función para actualizar gráficos
+async function updateCharts(ticker) {
+    try {
+        const response = await fetch(`/api/chart-data/${ticker}`);
+        const chartData = await response.json();
+        
+        if (!chartData.timestamps || chartData.timestamps.length === 0) {
+            return;
+        }
+        
+        // Formatear timestamps (mostrar solo hora:minuto)
+        const labels = chartData.timestamps.map(ts => {
+            const date = new Date(ts);
+            return date.toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' });
+        });
+        
+        // Actualizar o crear gráfico de Delta
+        updateOrCreateChart(
+            `${ticker}-delta-chart`,
+            labels,
+            chartData.deltas,
+            'Delta Neto',
+            chartColors.delta
+        );
+        
+        // Actualizar o crear gráfico de Gamma
+        updateOrCreateChart(
+            `${ticker}-gamma-chart`,
+            labels,
+            chartData.gammas.map(g => g * 10000), // Escalar para mejor visualización
+            'Gamma Neto (×10⁻⁴)',
+            chartColors.gamma
+        );
+        
+        // Actualizar o crear gráfico de Precio
+        updateOrCreateChart(
+            `${ticker}-price-chart`,
+            labels,
+            chartData.prices,
+            'Precio ($)',
+            chartColors.price
+        );
+        
+        // Actualizar o crear gráfico de Volatilidad
+        updateOrCreateChart(
+            `${ticker}-vol-chart`,
+            labels,
+            chartData.volatilities,
+            'Volatilidad (%)',
+            chartColors.vol
+        );
+        
+    } catch (error) {
+        console.error(`Error updating charts for ${ticker}:`, error);
+    }
+}
+
+// Función para actualizar o crear gráficos
+function updateOrCreateChart(canvasId, labels, data, label, color) {
+    const canvas = document.getElementById(canvasId);
+    if (!canvas) return;
+    
+    const ctx = canvas.getContext('2d');
+    
+    if (charts[canvasId]) {
+        // Actualizar gráfico existente
+        charts[canvasId].data.labels = labels;
+        charts[canvasId].data.datasets[0].data = data;
+        charts[canvasId].update('none'); // Sin animación para mejor rendimiento
+    } else {
+        // Crear nuevo gráfico
+        charts[canvasId] = new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: labels,
+                datasets: [{
+                    label: label,
+                    data: data,
+                    borderColor: color,
+                    backgroundColor: color.replace('1)', '0.1)'),
+                    borderWidth: 2,
+                    tension: 0.4,
+                    fill: true,
+                    pointRadius: 3,
+                    pointBackgroundColor: color,
+                    pointBorderColor: '#1e1e2e',
+                    pointBorderWidth: 1
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: true,
+                plugins: {
+                    legend: {
+                        display: true,
+                        labels: {
+                            color: 'rgba(160, 160, 192, 0.9)',
+                            font: { size: 12 }
+                        }
+                    },
+                    tooltip: {
+                        backgroundColor: 'rgba(30, 30, 46, 0.9)',
+                        titleColor: '#00d4ff',
+                        bodyColor: 'rgba(160, 160, 192, 0.9)',
+                        borderColor: 'rgba(74, 74, 106, 0.5)',
+                        borderWidth: 1,
+                        titleFont: { weight: 'bold' },
+                        padding: 10,
+                        displayColors: false
+                    }
+                },
+                scales: {
+                    x: {
+                        grid: {
+                            color: chartColors.grid,
+                            drawBorder: false
+                        },
+                        ticks: {
+                            color: 'rgba(160, 160, 192, 0.6)',
+                            font: { size: 10 },
+                            maxTicksLimit: 10
+                        }
+                    },
+                    y: {
+                        grid: {
+                            color: chartColors.grid,
+                            drawBorder: false
+                        },
+                        ticks: {
+                            color: 'rgba(160, 160, 192, 0.6)',
+                            font: { size: 10 }
+                        }
+                    }
+                }
+            }
+        });
+    }
+}
+
 // Función para actualizar comparativa
 function updateComparison(data) {
     const compareContainer = document.getElementById('compare-cards');
@@ -79,9 +233,6 @@ function updateComparison(data) {
 function createCompareCard(ticker, data) {
     const col = document.createElement('div');
     col.className = 'col-md-4 mb-3';
-    
-    const directionClass = data.prediction.direction_color === 'success' ? 'text-success' : 
-                          data.prediction.direction_color === 'danger' ? 'text-danger' : 'text-warning';
     
     col.innerHTML = `
         <div class="compare-card">
@@ -132,6 +283,15 @@ document.addEventListener('DOMContentLoaded', function() {
     
     // Detener actualizaciones cuando el usuario deja la página
     window.addEventListener('beforeunload', stopAutoUpdate);
+    
+    // Manejar cambios de tabs para actualizar gráficos
+    document.querySelectorAll('[role="tab"]').forEach(tab => {
+        tab.addEventListener('shown.bs.tab', function() {
+            setTimeout(() => {
+                Object.values(charts).forEach(chart => chart.resize());
+            }, 100);
+        });
+    });
 });
 
 // Permitir actualización manual con F5
